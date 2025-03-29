@@ -33,6 +33,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/master-notifikasi', [MasterNotificationController::class, 'index'])->name('master');
 });
 
+Route::get('/test-email', function () {
+    $details = [
+        'title' => 'Test Email',
+        'body' => 'Ini adalah email percobaan dari Laravel'
+    ];
+
+    \Mail::raw($details['body'], function($message) {
+        $message->to('rifalkurniawan289@gmail.com')
+                ->subject('Test Email from Laravel');
+    });
+
+    return "Email sent!";
+});
+
+
 // web.php
 Route::post('/kirim-notifikasi/{id}', [MasterNotificationController::class, 'kirim']);
 Route::post('/kirim-email/{id}', [MasterNotificationController::class, 'email']);

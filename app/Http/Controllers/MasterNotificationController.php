@@ -65,11 +65,11 @@ class MasterNotificationController extends Controller
 
         $data = $request->all();
         // Default tujuan email
-        $tujuan = 'eskohengdelapansembilan@gmail.com';
+        $tujuan = 'giantzord@gmail.com';
 
         // Kirim email
         Mail::to($tujuan)->send(new NotifikasiPembayaranMail($data));
 
-        return response()->json(['message' => 'Email berhasil dikirim ke santri ID ' . $id]);
+        return response()->json(['message' => 'Email berhasil dikirim ke wali santri ' . $data['nama']]);
     }
 }

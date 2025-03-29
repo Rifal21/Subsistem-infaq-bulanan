@@ -23,7 +23,7 @@ class KirimEmailNotifikasiSPP implements ShouldQueue
 
     public function handle(): void
     {
-        $emailTujuan = 'eskohengdelapansembilan@gmail.com';
+        $emailTujuan = 'giantzord@gmail.com';
 
         Mail::to($emailTujuan)->send(new NotifikasiPembayaranMail($this->data));
     }

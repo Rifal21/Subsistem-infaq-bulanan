@@ -124,16 +124,16 @@ class KirimNotifikasiSPPAuto extends Command
         $rows = collect($rawData)->skip(1); // Buang header
 
         // Filter data yang belum bayar (status kosong atau '-')
-        $santri = $rows->filter(function ($item) use ($kolomBulan) {
-            return empty($item[$kolomBulan]) || $item[$kolomBulan] === '-';
-        });
+        // $santri = $rows->filter(function ($item) use ($kolomBulan) {
+        //     return empty($item[$kolomBulan]) || $item[$kolomBulan] === '-';
+        // });
 
-        if ($santri->isEmpty()) {
-            $this->info("Tidak ada data santri dengan status kosong untuk bulan $bulanInput.");
-            return;
-        }
+        // if ($santri->isEmpty()) {
+        //     $this->info("Tidak ada data santri dengan status kosong untuk bulan $bulanInput.");
+        //     return;
+        // }
 
-        foreach ($santri as $s) {
+        foreach ($rows as $s) {
             $data = [
                 'id'     => $s['0'], // kolom ID
                 'nama'   => $s['1'],
