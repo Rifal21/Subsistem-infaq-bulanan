@@ -13,7 +13,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('app:kirim-notifikasi-s-p-p-auto')->dailyAt('08:00');
-        $schedule->command('app:kirim-notifikasi-s-p-p-auto --bulan=OKT')->hourly();   ;
+        // $schedule->command('app:kirim-notifikasi-s-p-p-auto --bulan=OKT')->hourly();
+        $schedule->command('spp:kirim-wa --bulan=OKT')->hourly();
+        // $schedule->command('spp:kirim-wa --bulan=OKT')->everyMinute();
+        // $schedule->command('spp:kirim-wa --bulan=OKT')->everyFiveMinutes();
     }
 
     /**

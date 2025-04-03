@@ -148,6 +148,6 @@ class KirimNotifikasiSPPAuto extends Command
             $this->info("Queued email untuk: {$data['nama']} ($bulanInput)");
         }
 
-        $this->info("Selesai queue email notifikasi ke {$santri->count()} santri.");
+        $this->info("Selesai queue email notifikasi ke {$rows->count()} santri.");
     }
 }

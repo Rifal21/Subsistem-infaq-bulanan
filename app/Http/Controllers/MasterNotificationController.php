@@ -2,14 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\KirimNotifikasiWA;
 use App\Mail\NotifikasiPembayaranMail;
 use App\Models\Kelas;
+use App\Services\TwilioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
 class MasterNotificationController extends Controller
 {
+    protected $twilioService;
+
+    public function __construct(TwilioService $twilioService)
+    {
+        $this->twilioService = $twilioService;
+    }
 
     public function index(Request $request)
     {
@@ -55,9 +63,46 @@ class MasterNotificationController extends Controller
     // NotifController.php
     public function kirim(Request $request, $id)
     {
-        dd($request->all());
-        // TODO: logic kirim WA/email
-        return response()->json(['message' => 'Notifikasi WhatsApp berhasil dikirim ke santri ID ' . $id]);
+        $data = $request->all();
+        // dd($data);
+
+        // Tambahkan nomor WA, misalnya dari field `wa`
+        if (empty($data['wa'])) {
+            return response()->json(['message' => 'Nomor WhatsApp tidak tersedia'], 400);
+        }
+
+        // KirimNotifikasiWA::dispatch($data);
+        $nama = $data['nama'];
+        $kelas = $data['kelas'];
+        $bulan = $data['bulan'];
+        $ustadz = $data['ustadz'];
+        $nomor = preg_replace('/[^0-9]/', '', $data['wa']);
+
+        // Check if number starts with 0
+        if (str_starts_with($nomor, '0')) {
+            // Replace leading 0 with 62
+            $nomor = '+62' . substr($nomor, 1);
+        }
+        // Check if number starts with 8
+        elseif (str_starts_with($nomor, '8')) {
+            // Add 62 before the number
+            $nomor = '+62' . $nomor;
+        }
+        // If number already starts with 62, leave it as is
+        $status = strtolower($data['status'] ?? '-');
+        // dd($status);
+
+        if ($status === '-' || $status === 'belum' || empty($status)) {
+            $pesan = "Assalamu'alaikum $nama, ini adalah pengingat untuk pembayaran SPP bulan $bulan. Mohon segera melakukan pembayaran sebelum tanggal 10. Terima kasih. Ustadz: $ustadz";
+        } else {
+            $pesan = "Assalamu'alaikum $nama, terima kasih telah melakukan pembayaran SPP bulan $bulan. Semoga Allah memberikan keberkahan untukmu dan keluargamu. Ustadz: $ustadz";
+        }
+
+
+        // Dispatch ke Queue
+        KirimNotifikasiWA::dispatch($nomor, $pesan);
+
+        return response()->json(['message' => 'Notifikasi WhatsApp sedang diproses']);
     }
 
     public function email(Request $request, $id)

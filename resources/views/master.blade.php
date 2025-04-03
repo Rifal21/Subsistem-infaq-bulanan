@@ -63,12 +63,12 @@
                         'APR' => 17,
                         'MEI' => 18,
                         'JUN' => 19,
-                        'JULI' => 6,
-                        'AUG' => 7,
-                        'SEPT' => 8,
-                        'OKT' => 9,
-                        'NOP' => 10,
-                        'DES' => 11,
+                        'JULI' => 8,
+                        'AUG' => 9,
+                        'SEPT' => 10,
+                        'OKT' => 11,
+                        'NOP' => 12,
+                        'DES' => 13,
                     ];
 
                     $kolomBulan = $mapBulan[$namaBulan] ?? null;
@@ -81,6 +81,7 @@
                             <th class="px-3 py-2">KLS</th>
                             <th class="px-3 py-2">L/P</th>
                             <th class="px-3 py-2">USTADZ</th>
+                            <th class="px-3 py-2">Whatsapp</th>
                             @if ($kolomBulan)
                                 <th class="px-3 py-2">{{ $namaBulan }}</th>
                             @endif
@@ -99,6 +100,7 @@
                                 <td class="px-3 py-2">{{ $item[2] ?? '-' }}</td>
                                 <td class="px-3 py-2">{{ $item[3] ?? '-' }}</td>
                                 <td class="px-3 py-2">{{ $item[4] ?? '-' }}</td>
+                                <td class="px-3 py-2">{{ $item[5] ?? '-' }}</td>
                                 @if ($kolomBulan)
                                     <td class="px-3 py-2">{{ $item[$kolomBulan] ?? '-' }}</td>
                                 @endif
@@ -109,7 +111,7 @@
                                         data-status="{{ $nilaiBulan ? 'sudah' : 'belum' }}">
                                     </span>
                                 </td>
-                                <td class="px-3 py-2">
+                                <td class="px-3 py-2 flex space-x-2">
                                     <a href="#"
                                         class="text-sm bg-blue-600 hover:bg-blue-800 send-mail text-white rounded-lg p-2"
                                         data-id="{{ $item[0] }}" data-nama="{{ $item[1] }}"
@@ -117,6 +119,14 @@
                                         data-ustadz="{{ $item[4] }}" data-bulan="{{ $namaBulan }}"
                                         data-status="{{ $item[$kolomBulan] ?? '-' }}">
                                         <i class="fas fa-envelope"></i>
+                                    </a>
+                                    <a href="#"
+                                        class="text-sm bg-green-600 hover:bg-green-800 send-whatsapp text-white rounded-lg p-2"
+                                        data-id="{{ $item[0] }}" data-nama="{{ $item[1] }}"
+                                        data-kelas="{{ $item[2] }}" data-gender="{{ $item[3] }}"
+                                        data-ustadz="{{ $item[4] }}" data-bulan="{{ $namaBulan }}"
+                                        data-wa="{{ $item[5] }}" data-status="{{ $item[$kolomBulan] ?? '-' }}">
+                                        <i class="fab fa-whatsapp"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -137,17 +147,15 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Klik pada badge status
-                document.querySelectorAll('.badge-status').forEach(badge => {
+                document.querySelectorAll('.send-whatsapp').forEach(badge => {
                     badge.addEventListener('click', () => {
                         const id = badge.dataset.id;
                         const status = badge.dataset.status;
-                        console.log(id, status);
 
-                        if (status === 'belum') {
+                        if (status === 'belum' || status === '-') {
                             Swal.fire({
                                 title: 'Kirim Notifikasi?',
-                                text: 'Santri ini belum bayar. Kirim pesan pengingat via WhatsApp atau Email?',
+                                text: 'Santri ini belum bayar. Kirim pesan pengingat via WhatsApp?',
                                 icon: 'warning',
                                 showCancelButton: true,
                                 confirmButtonText: 'Kirim',
@@ -161,7 +169,14 @@
                                                 'Content-Type': 'application/json'
                                             },
                                             body: JSON.stringify({
-                                                metode: 'whatsapp'
+                                                id: badge.dataset.id,
+                                                nama: badge.dataset.nama,
+                                                kelas: badge.dataset.kelas,
+                                                gender: badge.dataset.gender,
+                                                ustadz: badge.dataset.ustadz,
+                                                bulan: badge.dataset.bulan,
+                                                wa: badge.dataset.wa,
+                                                status: badge.dataset.status
                                             })
                                         })
                                         .then(res => res.json())
@@ -174,13 +189,37 @@
                             });
                         } else {
                             Swal.fire({
-                                icon: 'success',
-                                title: 'Terima Kasih!',
-                                text: 'Santri ini sudah melakukan pembayaran.'
+                                title: 'Kirim Notifikasi?',
+                                text: 'Santri ini sudah bayar. Kirim pesan via WhatsApp?',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Kirim',
+                                cancelButtonText: 'Batal'
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    fetch(`/kirim-notifikasi/${id}`, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            id: badge.dataset.id,
+                                            nama: badge.dataset.nama,
+                                            kelas: badge.dataset.kelas,
+                                            gender: badge.dataset.gender,
+                                            ustadz: badge.dataset.ustadz,
+                                            bulan: badge.dataset.bulan,
+                                            wa: badge.dataset.wa,
+                                            status: badge.dataset.status
+                                        })
+                                    });
+                                }
                             });
                         }
                     });
                 });
+
 
                 // Klik tombol email
                 document.querySelectorAll('.send-mail').forEach(button => {
